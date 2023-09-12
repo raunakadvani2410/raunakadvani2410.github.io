@@ -1,1 +1,1 @@
-# Personal Portfolio Highlighting Education, Experience, and Projects
+My personal portfolio highlighting education, experience, projects, and skills
