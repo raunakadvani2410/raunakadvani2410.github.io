@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.313">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Where is Your Money, and Why? – methods</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<link href="./../img/favicon.ico" rel="icon">
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Where is Your Money, and Why?</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html">
+ <span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="./methods.html" aria-current="page">
+ <span class="menu-text">Methods</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./data.html">
+ <span class="menu-text">Data</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./authors.html">
+ <span class="menu-text">Authors</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+
+<section id="methods" class="level1">
+<h1>Methods</h1>
+<p>This section describes the process, considerations, and tools that went into developing each visualization in the Home tab. All the code for this project is available on <a href="https://github.com/anly503/spring2023-project-team-4/tree/main/code">GitHub</a>.</p>
+<section id="figure-1-table-of-us-bank-assets-equity-and-liabilities-per-state-of-of-2022q4" class="level3">
+<h3 class="anchored" data-anchor-id="figure-1-table-of-us-bank-assets-equity-and-liabilities-per-state-of-of-2022q4">Figure 1: Table of US bank assets, equity and liabilities per state of of 2022Q4</h3>
+<p><a href="./index.html#sec-interactive-table">View plot</a></p>
+<p>The interactive table was built with the quarterly financials data set collected with the API client we built. We first selected rows with December 31st, 2022, as their filing date, and then we aggregated them by equities, liabilities, and assets. Next, we performed formatting on the numbers format and colors and then created a figure that aggregated the three tables. A drop-down was also added, which changes the display of the financial metrics selected.</p>
+</section>
+<section id="figure-2-grid-bubble-map-of-the-progression-of-bank-assets-per-decade-per-state" class="level3">
+<h3 class="anchored" data-anchor-id="figure-2-grid-bubble-map-of-the-progression-of-bank-assets-per-decade-per-state">Figure 2: Grid bubble map of the progression of bank assets per decade per state</h3>
+<p><a href="./index.html#sec-grid-bubble-map">View plot</a></p>
+<p>This plot is constructed using the <code>Folium</code> and <code>Geopandas</code> Python libraries and uses the quarterly financial data. We then combined this data with the ZIP code coordinate data to estimate the bank’s location. This join procedure added latitude and longitude columns to the data set, which we then combined into a two-tuple named <code>zip_coordinates</code>.</p>
+<p>To produce the plots, we first converted the data into a Geodataframe. Next, we created a function named. <code>plot_bank_assets_by_date()</code>, that filters the Geodataframe by date and then groups by state. Then, the function creates a <code>Folium</code> map and plots the bubbles. The function is run four times for December 31st of 1992, 2002, 2012, and 2022. The resulting plots are organized into a 2 x 2 grid and rendered as HTML. The end product is a grid of <code>Folium</code> plots that allow the user to see the progression of the growth of bank assets in each decade and fully interact with each of these maps.</p>
+<p>Alternative attempts to produce this plot included cluster markers which failed to capture the size of the banks’ assets, rather than just the count. Additionally, we set up a date slider with a play button, which did not allow for an immersive visual experience due to the plot <code>Folium</code> plot having to re-render each time. Future versions of this plot may include server-side action that allows for this kind of functionality.</p>
+</section>
+<section id="figure-3-dot-map-with-heatmap-overlay-of-bank-assets-as-of-q4-2022" class="level3">
+<h3 class="anchored" data-anchor-id="figure-3-dot-map-with-heatmap-overlay-of-bank-assets-as-of-q4-2022">Figure 3: Dot map with heatmap overlay of bank assets as of Q4 2022</h3>
+<p><a href="./index.html#sec-dot-and-heatmap">View plot</a></p>
+<p>This second geospatial plot follows a similar logic to the previous; however, it only shows data as of December 31st, 2022. The main difference is that it shows a point in the ZIP code where each bank is. The plot also has a heatmap overlay showing the concentration of banks in the U.S. map. This plot also uses bubble size to show the size of the banks’ assets, in which the largest banks in the U.S. distinguish themselves clearly.</p>
+</section>
+<section id="figure-4-state-bank-deposits-by-bank" class="level3">
+<h3 class="anchored" data-anchor-id="figure-4-state-bank-deposits-by-bank">Figure 4: State bank deposits by bank</h3>
+<p><a href="./index.html#sec-state-bank-deposits">View plot</a></p>
+<p>The data for this plot comes from the quarterly bank financial data collected using the FDIC API. Then, in the Data Cleaning tab, we grouped the data by state, by bank, and by date meaning our data now showed the total assets, deposits, etc. that each bank in a given state held in a given quarter. This helped to shrink what was previously a massive dataset. However, that was still quite large. Therefore, that data file was added to <code>.gitignore</code>, however, you can see the code to create this file under <code>quarterly_data_cleaning.ipynb</code>. Running this notebook will allow you to see exactly what data we are using.</p>
+<p>This plot went through a lot of variations. It began by included every state’s total assets in five year windows with a slider to let the user move through the data. We then realize that five years was no where near enough time to see meaningful change so we expanded it to a decade long window. From there we realized that it would be better to just show all of the time at once, so the slider was scrapped. After doing some digging with the geo-spacial data, we found some interesting trends with the amount of money deposited in states you would not expect, such as South Dakota. In particular, we found that the biggest banks had tons of assets here. Quickly we realized this was worth exploring further so I split the data up by banks. However, it remained difficult to see how different the amounts of money was between states as you had to flip back and forth using the button. Finally, we switched to this subplot view which displays all of the states at once. The left column features the top three states by GDP while the right column features the three states we felt were most surprising in containing a ton of deposits despite being smaller states. They are all sorted vertically by GDP.</p>
+<p>After the poster fair, we decided to standardize the y-axes of all of the plots so that the differences in size between each state is more obvious. Now, the user is not asked to recognize the different y-axis maxes and instead they can easily see that, for example, California is half of the size of North Carolina. It also helps to conceptualize the size of the banks in the right column and see just how large JP Morgan, for example, is.</p>
+</section>
+<section id="figure-5-temporal-trend-of-the-total-domestic-deposits-in-the-us-for-the-past-3-decades" class="level3">
+<h3 class="anchored" data-anchor-id="figure-5-temporal-trend-of-the-total-domestic-deposits-in-the-us-for-the-past-3-decades">Figure 5: Temporal trend of the total domestic deposits in the US for the past 3 decades</h3>
+<p><a href="./index.html#sec-temporal-assets">View plot</a></p>
+<p>The data for this plot includes the total domestic deposits held by US banks for the past 3 decades, and is scraped using the FDIC API. Using <code>ggplot</code> in RStudio, the plot is formed by placing stacked bars, representing total assets for the year in the US. The data preparation included aggregating the dataframe and grouping the column names by the current year, in order to calculate the total assets. Next, the data is also categorised into the different bank classes, including Federal Reserve Members, Savings Banks, Mutual Savings Banks, etc. This is done so that the viewer is able to see the temporal trends not only in the total assets in the country for a given year, but to also see the trends within the different groups.</p>
+</section>
+<section id="figure-6-disparity-of-the-top-4-banks" class="level3">
+<h3 class="anchored" data-anchor-id="figure-6-disparity-of-the-top-4-banks">Figure 6: Disparity of the top 4 banks</h3>
+<p><a href="./index.html#sec-top-banks">View plot</a></p>
+<p>The previous plot yields a result about the growth in assets over the years, but, in order to better understand the reason for this, the data frame is then aggregated by mean assets for the bank name and the year 2022, and then arranged in descending order to view the largest banks in the US for the most recent year, to create a dataframe called <code>filtered_desc</code>. The plot is a bar plot, with the mean assets for the year (calculated over quarterly data) on the y axis and the bank name on the x axis.</p>
+</section>
+<section id="figure-7-the-distribution-of-commercial-banks-in-the-us-by-the-assets-in-possession" class="level3">
+<h3 class="anchored" data-anchor-id="figure-7-the-distribution-of-commercial-banks-in-the-us-by-the-assets-in-possession">Figure 7: The distribution of commercial banks in the US by the assets in possession</h3>
+<p><a href="./index.html#sec-top-commercial">View plot</a></p>
+<p>Now, from the previous plot, top few banks are the ones that dominate the entire industry, so we adjust the data to take a more holistic approach towards viewing the banks, and then create a categorical variable for the asset class for the year 2022, divided by the mean US Dollars in assets. This variable has 4 categories. The number of banks in each category is plotted on the y axis with bars, and the x axis represents the bank names.</p>
+</section>
+<section id="figure-8-breakdown-of-top-5-banks-the-next-125-banks-and-all-other-banks" class="level3">
+<h3 class="anchored" data-anchor-id="figure-8-breakdown-of-top-5-banks-the-next-125-banks-and-all-other-banks">Figure 8: Breakdown of top 5 banks, the next 125 banks, and all other banks</h3>
+<p><a href="./index.html#sec-grouped-top-banks">View plot</a></p>
+<p>Only a small percentage of the banks in the previous plot belonged to the largest asset class with assets ranging from 10 million to 4 billion dollars, so we next decided to compare the top 5 banks, the next 125 banks, and all other banks in terms of their total assets, and also observe a temporal trend. The data is then aggregated again: creating another categorical variable for the asset group, and assigning them to banks based on the descending of their assets for a given year. The data is thereby prepared in such a way that the viewer can observe the disparity in how the top banks completely dominate the industry, and also view how this has not always been the case.</p>
+</section>
+<section id="figure-9-top-and-bottom-20-histogram" class="level3">
+<h3 class="anchored" data-anchor-id="figure-9-top-and-bottom-20-histogram">Figure 9: Top and Bottom 20 Histogram</h3>
+<p><a href="./index.html#sec-state-bank-deposits">View plot</a></p>
+<p>This plot was built using the Altair library within python. As mentioned on the home page, this plot depicts a modified dataset where only banks that are present for at least 100 quarters are represented, including within the ‘mean’ column. The interactivity within the Altair library allows the user to click on a bar within the histogram and have that bank’s equity capital ratio for each quarter since 1992 Q1 shown in the line graph below the histogram.</p>
+<p>The intention with this plot was to get an understanding of whether banks that remain steady for an extended period of time fall close to the average EQR, and we find that this is not necessarily the case. However, it is more noteworthy that none of the four major banks that we have previously examined are present within the top and bottom 20 banks. In fact, as we will see in Figure 10, they fall remarkably close to the overall average. What we also note is that only 4 of the top 20 banks in this subset are from the three states we noted earlier (NC, OH, SD), with one being from North Carolina, and the remaining three being headquartered in Ohio. Additionally, 3 of the top 20 banks in terms of average equity capital ratio are from California, and two are from Michigan.</p>
+<p>We experimented with the entire dataset, but the data were so skewed in both directions that we ultimately chose to only represent banks that appeared for at least 100 quarters since 1992. Some banks that likely only made up a few quarters had an EQR of over 100, and some even had values below 0. Therefore, in order to gain more meaningful insights about the general range of equity capital ratio over the past 30 years, we chose this specific subset of the data for this linked plot.</p>
+</section>
+<section id="figure-10-top-4-banks-eqr-by-quarter-with-overall-average" class="level3">
+<h3 class="anchored" data-anchor-id="figure-10-top-4-banks-eqr-by-quarter-with-overall-average">Figure 10: Top 4 banks EQR by quarter with overall average</h3>
+<p><a href="./index.html#sec-quarters-line-graph">View plot</a></p>
+<p>
+This plot was built using the Altair library within python. This plot separates the 4 major banks that we examine throughout this project, and compares them to the overage average. The overall average does include the four banks, but it will not be skewed by the data since there are over 4,000 unique FDIC-insured banks within our dataset, and each are weighed equally in terms of determining the average for each quarter since 1992.
+</p>
+</section>
+<section id="figure-11-joint-distribution-of-average-assets-owned-and-average-eqr-per-year" class="level3">
+<h3 class="anchored" data-anchor-id="figure-11-joint-distribution-of-average-assets-owned-and-average-eqr-per-year">Figure 11: Joint distribution of average assets owned and average EQR per year</h3>
+<p><a href="./index.html#sec-eqr-and-assets">View plot</a></p>
+<p>This plot was built using the Plotly library within python. Inspiration for the design of the plot was taken from the ANLY 503 week 8 lecture slides, specifically the slide titled “Marginal plot-2.” This plot does depict a small subset of our original data, as it contains only banks with an average total asset count of under 500,000. This was done for two reasons. The first is to achieve the goal of analyzing the distinction between the equity capital ratio of the top 4 banks and the smaller banks. The second reason is because it would be very difficult to interpret the heatmap with all banks, since the majority of banks have an average asset count of less than 500,000. Therefore, it would be impossible to see the separation between the top banks that far surpass 500,000 in average total assets, and the banks that do not.</p>
+</section>
+<section id="figure-12-bubble-plot-of-equity-capital-and-equity-capital-ratio-by-year" class="level3">
+<h3 class="anchored" data-anchor-id="figure-12-bubble-plot-of-equity-capital-and-equity-capital-ratio-by-year">Figure 12: Bubble plot of equity capital and equity capital ratio by year</h3>
+<p><a href="./index.html#sec-bubble-plot">View plot</a></p>
+<p>This plot was built using the Plotly library within python. Inspiration for the design of the plot was taken from the ANLY 503 week 8 lecture slides, specifically the slide titled “animation and sliders.” Inspiration was also drawn from lab-4.1, which explored various designs for time series bubble plots.</p>
+<p>This plot contains a subset of the full dataset, as it explores only Q4 values from 1992, 2002, 2012, and 2022. Therefore, there are no averages taken for banks; these are the equity capital and equity capital ratio values for that specific quarter. We also filtered the dataset so it only included banks with a non-negative equity capital ratio, and an equity capital value less than or equal to 20,000,000. This is for the same reasons as illustrated in Figure 11. Essentially, we wanted to focus in on the smaller banks, since we already examined the equity capital ratio of the four large banks. Moreover, in an effort to make the plot fit on the page and look asthetically pleasing, we wanted to remove outliers and keep a filter where a large percentage of the data is still present, but the dispersion is not too drastic.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">A project by <a href="./authors.html">Group 4</a> <br></div>   
+    <div class="nav-footer-right">Made with <a href="https://quarto.org/">Quarto</a><br> <a href="https://github.com/anly503/spring2023-project-team-4">View the source at GitHub</a></div>
+  </div>
+</footer>
+
+
+
+</body></html>

@@ -1,0 +1,36 @@
+# Data {#data}
+
+This section contains a thorough description of the data used in this project. First, we discuss the banking data, its collection, and its main definitions. Second, we describe the coordinate data used for the geospatial plots. All data table are available on [GitHub](https://github.com/anly503/spring2023-project-team-4/tree/main/data).
+
+
+## Banking data
+
+We gathered the data from the FDIC's API  [@federal_deposit_insurance_corporation_bankfind_2023]. The API allows querying financial institutions' general and structural data, historical financial information, and bank failure information. In this study, we focus on historical financial information. The FDIC API offers a comprehensive menu of fields covering all the previously mentioned topics, from financial ratios, income and balance sheet data, bank structure information, and more (field list available [here](https://github.com/anly503/spring2023-project-team-4/tree/main/data/data_documentation)).
+
+Even though the website offers a query and CSV-download user interface, we constructed our own Python API client to make the process faster (available [here](https://github.com/anly503/spring2023-project-team-4/tree/main/code/data_gathering)). The client uses the Python `requests` library to bring in the API's json response, where function `get_all_financial_reporting_data()` processes the endpoint, reporting period, fields, and result_limit as required. 
+
+We then collected the quarterly financial information for all insured banks from Q1 1992 to Q4 2022 (30 years). The data is available [here](https://github.com/anly503/spring2023-project-team-4/tree/main/data/quarterly_financials). Next, we cleaned the data to combine the 30 years' worth of data, which totaled 1,014,549 rows. We collected 16 data fields (columns) described as follows:
+
+| Field name    | Code          | Description   |
+| ---           |---            | ---           |
+| Zip code | ZIP | The first three, four, or five digits of the full postal zip code representing physical location of the institution or one of its branch offices. |
+| Institution class | BKCLASS | A classification code assigned by the FDIC based on the institution's charter type. |
+| Equity capital ratio | EQR	        | Percentage calculated as the ratio of Equity capital and Total assets. |
+| Report Date              | REPDTE	        | The last day of the financial reporting period selected.              |
+| Deposits held in domestic offices               |DEPDOM	        | The sum of all domestic office deposits, including demand deposits, money market deposits, other savings deposits and time deposits.               |
+| Total assets               |ASSET	        | The sum of all assets owned by the institution including cash, loans, securities, bank premises and other assets. This total does not include off-balance-sheet accounts.               |
+| State name | STNAME | State in which the institution or branch is physically located. |
+| Equity capital | EQ | Total equity capital (includes preferred and common stock, surplus and undivided profits). |
+| Institution name | NAME | The legal title or name of the institution. |
+| City | CITY | The city in which an institution or branch office is physically located. |
+| Address | ADDRESS | The street address in which an institution or branch office is physically located. |
+| Inactive date | ENDEFYMD | The date that ends or closes out the last structural event relating to an institution. For closed institutions, this date represents the day that the institution became inactive.              |
+| FDIC Certificate # | CERT | A unique NUMBER assigned by the FDIC used to identify institutions and for the issuance of insurance certificates. |
+| Established date | ESTYMD | The date on which the institution or branch began operations. |
+| Total liabilities | LIAB | The sum of all liabilities owed by the institution |
+| Record ID | ID | ID identifying the institution and date of filing.|
+
+
+## Zip coordinates
+
+We collected coordinate data for developing geospatial visualizations. The data consists of zip codes and cartographic boundaries. The zip code data originates from the ZIP Code Tabulation Areas based on the 2020 Census tabulation blocks, available in @us_census_bureau_gazetteer_2022. The cartographic boundaries consist of a shapefile describing states at the 500k resolution level, available in @us_census_bureau_cartographic_2021.

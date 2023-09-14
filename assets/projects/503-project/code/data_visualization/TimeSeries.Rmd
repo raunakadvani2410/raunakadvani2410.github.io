@@ -1,0 +1,417 @@
+---
+title: "Time Series"
+editor: visual
+format:
+  html:
+    toc: true
+    code-fold: true
+    embed-resources: true
+execute:
+  echo: true
+---
+
+## Import Data
+
+```{r setup, include=FALSE}
+getwd()
+```
+
+```{r}
+library(plotly)
+library(tidyverse)
+library(ggplot2)
+library(tidyr)
+library(htmlwidgets)
+options(warn = - 1)
+library(withr)
+library(scales)
+# lubridate, zoo, xts
+options(scipen=999)
+```
+
+```{r}
+merge_csv_files <- function(folder_path) {
+  # get the list of CSV files in the folder
+  csv_files <- list.files(folder_path, pattern = "\\.csv$", full.names = TRUE)
+  
+  # read in all the CSV files and merge them together using rbind()
+  merged_df <- do.call(rbind, lapply(csv_files, read.csv))
+  
+  # return the merged data frame
+  return(merged_df)
+}
+
+df <- merge_csv_files("../../data/quarterly_financials/")
+```
+
+## Clean Data
+
+```{r}
+year <- substr(df$REPDTE, 1, 4) # add date column
+month <- substr(df$REPDTE, 5, 6)
+day <- substr(df$REPDTE, 7, 8)
+df$date <- as.Date(paste(year, month, day, sep = "-"))
+```
+
+```{r}
+unique(df$BKCLASS)
+```
+
+```{r}
+summary(df$DEPDOM)
+```
+
+```{r}
+# rename bank class names
+df$BKCLASS <- replace(df$BKCLASS, df$BKCLASS=="SM", "State Member Banks")
+df$BKCLASS <- replace(df$BKCLASS, df$BKCLASS=="NM", "State Nonmember Banks")
+df$BKCLASS <- replace(df$BKCLASS, df$BKCLASS=="N", "National Member Banks")
+df$BKCLASS <- replace(df$BKCLASS, df$BKCLASS=="SB", "Savings Banks")
+df$BKCLASS <- replace(df$BKCLASS, df$BKCLASS=="SI", "Stock & Mutual Savings Banks")
+df$BKCLASS <- replace(df$BKCLASS, df$BKCLASS=="SL", "State Stock Savings & Loans")
+df$BKCLASS <- replace(df$BKCLASS, df$BKCLASS=="OI", "Other Insured Institutions")
+
+df_agg <- df %>% group_by(date, BKCLASS) %>% summarise(total_deposits = sum(DEPDOM)) # aggregate for different bank classes
+
+colnames(df_agg)[1] <- 'Date'
+colnames(df_agg)[2] <- 'Bank Class'
+colnames(df_agg)[3] <- 'TotalDeposits'
+```
+
+```{r}
+df_agg$TotalDeposits <- df_agg$TotalDeposits * 1000
+df_agg$`Total Deposits` <- dollar_format()(df_agg$TotalDeposits)
+```
+
+```{r}
+#g <- ggplot(df_agg, aes(date, total_deposits))
+#p <- g + geom_bar(aes(fill = BKCLASS))
+a <- ggplot(df_agg, aes(x = `Date`)) + geom_bar(aes(y = TotalDeposits, fill = `Bank Class`, text = paste("Date: ", Date, "<br>Total Deposits: ", `Total Deposits`, "<br> Bank Class: ", `Bank Class`)), stat = 'identity') + 
+  ylab("Total Deposits (USD)") + 
+  xlab("Date") +
+  theme_bw() +
+  scale_fill_discrete(name = "Bank Class") + 
+  scale_y_continuous(labels = function(x) paste0(format(x/1e12, scientific = FALSE), "T"))
+
+  #scale_y_continuous(labels = function(x) paste0(x/1e12, "T"))
+
+#a <- ggplotly(a)
+#z <- subplot(
+#  with_options(list(digits = 1), ggplotly(a)),
+#  with_options(list(digits = 6, scipen = 20), ggplotly(a))
+#)
+
+
+a <- ggplotly(a, tooltip = c("text")) %>%
+  layout(hoverlabel = list(bgcolor = "white", font = list(family = "arial", size = 12)),
+         hovertemplate = paste(
+           "Date: %{x}<br> <br>",
+           "%{x} <br>",
+           "Total Deposits (USD): %{y:.20f}"
+         )
+  )
+
+a
+saveWidget(a, file = "../../website/plots/timeseries/plot_1.html")
+
+```
+
+The above plot provides a temporal trend of the total domestic deposits in the US for the past 3 decades. Looking at this particular plot, we see a staggering uptick in bank deposits over the past 3 decades. Breaking down the assets by the bank class, we also see that each of the bank classes also have their own trends in terms of growth over the years. Firstly, looking at National Member Banks, we see that the majority of deposits belong to them. These banks are ones that are members of the Federal Reserve Bank, the central bank of the US. However, from the temporal trends, we see that National Member Banks did not always hold the majority of assets in the country. The only time there was an apparent upshot in the assets was around the 2000 mark, when the National Member Banks got a hold of a lot more assets and skyrocketed ahead of the other types of banks. We also see that Stock & Mutual Savings Banks have the last deposited in them, as they offer the most risk.
+
+```{r}
+# group the data by year, bank name, and quarter and calculate the mean assets
+grouped <- df %>%
+  group_by(year = lubridate::year(date), NAME) %>%
+  summarize(mean_assets = mean(ASSET))
+
+print(head(grouped))
+```
+
+```{r}
+sorted <- grouped %>%
+  arrange(desc(mean_assets)) # arrange from largest to smallest by assets
+
+filtered <- grouped %>% # for 2022 plot
+  filter(year ==2022)
+
+filtered_desc <- filtered %>% # for 2022
+  arrange(desc(mean_assets))
+```
+
+```{r}
+filtered_desc$mean_assets <- filtered_desc$mean_assets * 1000
+```
+
+```{r}
+x <- 10
+
+sliced <- filtered_desc %>% # create sliced df for top 10 banks
+  slice(1:x)
+
+sliced <- filtered %>%
+  arrange(desc(mean_assets))
+
+colnames(sliced)[1] <- 'Year'
+colnames(sliced)[2] <- 'Name'
+colnames(sliced)[3] <- 'MeanAssets'
+
+sliced$Name[1:10] <- c("JP Morgan", "Bank of America", "Citibank", "Wells Fargo", "US Bank", "PNC", "Truist", "Goldman Sachs", "Capital One", "TD")
+
+sliced <- head(sliced,10)
+```
+
+```{r}
+sliced <- sliced %>%
+  mutate(`Mean Assets` = paste0("$", format(as.character(MeanAssets), big.mark = ",", decimal.mark = ".")))
+
+sliced$`Mean Assets`[1] <- "$3,342,013,000"
+sliced$`Mean Assets`[2] <- "$2,445,012,750"
+sliced$`Mean Assets`[3] <- "$1,729,885,500"
+sliced$`Mean Assets`[4] <- "$1,726,695,000"
+sliced$`Mean Assets`[5] <- "$584,035,798"
+sliced$`Mean Assets`[6] <- "$543,735,276"
+sliced$`Mean Assets`[7] <- "$535,884,500"
+sliced$`Mean Assets`[8] <- "$494,355,250"
+sliced$`Mean Assets`[9] <- "$404,712,304"
+sliced$`Mean Assets`[10] <- "$400,928,240"
+
+sliced$MeanAssets <- sliced$MeanAssets * 1000
+
+sliced$`Mean Assets` <- dollar_format()(sliced$MeanAssets)
+```
+
+```{r}
+range(sliced$`Mean Assets`)
+```
+
+```{r}
+typeof(sliced$`Mean Assets`)
+```
+
+```{r}
+
+
+# b <- ggplot(sliced, aes(x = Name, y = MeanAssets)) +
+#   geom_bar(stat = "identity") +
+#   xlab("Bank Name") +
+#   ylab("Mean Assets") +
+#   labs(
+#     title = "",
+#     subtitle = "",
+#     caption = "Source: https://banks.data.fdic.gov/docs/"
+#   ) + 
+#   scale_y_continuous(labels = function(x) paste0(format(x/1e12, scientific = FALSE), "T")) +
+#   theme_classic() +
+#   #scale_y_discrete(limits = rev(levels(sliced_reorder$category))) + 
+#   geom_col(fill = "#008001") + 
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+# b <- b + scale_x_discrete(limits = fct_reorder(sliced$Name, sliced$MeanAssets, .desc = TRUE))
+# 
+# b <- ggplotly(b)
+# b %>% add_trace(hoverinfo='text')
+b <- ggplot(sliced, aes(x = Name, y = MeanAssets, text = paste("Bank Name: ", Name, "<br>Mean Assets: ", `Mean Assets`)))
+b <- b + geom_bar(stat = "identity", fill = "#008001") +
+  xlab("Bank Name") +
+  ylab("Mean Assets (USD)") +
+  scale_y_continuous(labels = function(x) paste0(format(x/1e12, scientific = FALSE), "T")) +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+b <- b + scale_x_discrete(limits = fct_reorder(sliced$Name, sliced$MeanAssets, .desc = TRUE))
+
+b <- ggplotly(b, tooltip = "text")
+b
+saveWidget(b, file = "../../website/plots/timeseries/plot_2.html")
+```
+
+The US is home to some of the largest and most popular commercial banks in the world. These banks offer a wide array of services to individuals and businesses. The banks we're most familiar with are the ones that are prevalent not only all over the country, but all over the world as well. These multinationals field a behemoth of assets, and dominate the entire industry. In the US, we see that there are 4 main banks which dominate the rest of the top 10. These banks are JP Morgan Chase, Bank of America, Wells Fargo, and Citibank. The stark disparity in these top 4 is noticeable by examining how Wells Fargo, the 4th largest bank in the US by assets, holds \$1.73B, while US Bank, the 5th largest bank, only holds \$584M, which is about 3 times less then that of US Bank. This resembles a skew in the distribution of assets held by the top 10 commercial banks in the US, with the top 4 banks holding the majority of the assets.
+
+```{r}
+# create factor variable asset class
+filtered_desc$asset_class <- cut(filtered_desc$mean_assets,
+                                 breaks = c(-Inf, 100000000, 1000000000, 10000000000, Inf),
+                                 labels = c("<100M", "100M-1B", "1B-10B", "10B-4T"))
+
+unique(filtered_desc$asset_class)
+
+filtered_desc$Count <- ifelse(filtered_desc$asset_class == "<100M", 564,
+                              ifelse(filtered_desc$asset_class == "100M-1B", 2595,
+                                     ifelse(filtered_desc$asset_class == "1B-10B", 761,
+                                            ifelse(filtered_desc$asset_class == "10B-4T", 151, NA))))
+
+stats <- data.frame(
+  asset_class = c("<100M", "100M-1B", "1B-10B", "10B-4T"),
+  count = c(564, 2595, 761, 151)
+)
+```
+
+```{r}
+percent = c('15.7%', '62.4%', '18.3%', '3.6%')
+
+filtered_desc$percent <- ifelse(filtered_desc$asset_class == "<100M", "15.7%", 
+                        ifelse(filtered_desc$asset_class == "100M-1B", "62.4%",
+                               ifelse(filtered_desc$asset_class == "1B-10B", "18.3%",
+                                      "3.6%")))
+
+c <- plot_ly(
+  x = filtered_desc$asset_class,
+  type = "histogram",
+  name = "Asset Class",
+  visible = TRUE,
+  showlegend = FALSE,
+  opacity = 1,
+  text = list('15.7%', '62.4%', '18.3%', '3.6%'),
+  #hoverinfo = "Asset Class, Count",
+  hovertext = "Asset Class, Count",
+  #hovertext = paste("Asset Class: ", filtered_desc$asset_class, "<br>Count: ", filtered_desc$Count),
+  orientation = "v",
+  marker = list(color = "green")) |>
+  layout(title = list(text = "",
+                      font = list(color = "black",
+                                  family = "Open Sans",
+                                  size = 17
+                                  )),
+         plot_bgcolor = "white",
+         paper_bgcolor = "white",
+         xaxis = list(color = "black",
+                      title = "Assets in Possession (USD)",
+                      gridcolor = "white"),
+         yaxis = list(color = "black",
+                      title = "Count",
+                      gridcolor = "white")
+         )# |>
+  #add_trace(
+    #labels = ~languages,
+    #values = ~users, 
+   # type = "histogram",
+    #hovertemplate = "<b><i>Asset Class: %{asset_class}</i></b> <br> <b><i>Count: %{count}</i></b>"
+ # ) #|> 
+  #layout(hoverlabel = list(
+   # font = list(
+    #family = "Sitka Small",
+    #size = 16,
+    #color = "black"
+  #)))
+c
+saveWidget(c, file = "../../website/plots/timeseries/plot_3.html")
+```
+
+Looking at the distribution of commercial banks in the US by the assets in possession, we get a better idea of what the entire distribution of assets is across the country. Our knowledge is mostly limited to the big brand names of banks: JP Morgan Chase, Wells Fargo, Bank of America, etc. These banks are the minority in the larger picture, as their access to capital and resources is only enjoyed by 3.6% of banks in the US. The majority of these banks only hold between \$100,000 and \$1M, taking up 62.4% of the entire distribution. Surprisingly, we see that a substantial 15.7% of banks are extremely small, holding less than \$100,000 in assets in 2022. Only a small fraction of these banks are in fact extremely large, but as we will see in the next plot, they hold immense amounts of assets.
+
+```{r}
+filtered_2012 <- grouped %>%
+  filter(year ==2012) %>%
+  arrange(desc(mean_assets))
+
+filtered_2002 <- grouped %>%
+  filter(year ==2002) %>%
+  arrange(desc(mean_assets))
+
+filtered_1992 <- grouped %>%
+  filter(year ==1992) %>%
+  arrange(desc(mean_assets))
+
+options(scipen=999) # change scientific notation
+```
+
+```{r}
+# now, make a new categorical variable for the bank's rank in terms of assets in possession
+
+filtered_desc$asset_group <- "others" # set default value for all rows
+filtered_desc$asset_group[1:5] <- "top-5" # set first 5 rows
+filtered_desc$asset_group[6:130] <- "next-125" # set next 125 rows
+
+filtered_2012$asset_group <- "others" # set default value for all rows
+filtered_2012$asset_group[1:5] <- "top-5" # set first 5 rows
+filtered_2012$asset_group[6:130] <- "next-125" # set next 125 rows
+
+filtered_2002$asset_group <- "others" # set default value for all rows
+filtered_2002$asset_group[1:5] <- "top-5" # set first 5 rows
+filtered_2002$asset_group[6:130] <- "next-125" # set next 125 rows
+
+filtered_1992$asset_group <- "others" # set default value for all rows
+filtered_1992$asset_group[1:5] <- "top-5" # set first 5 rows
+filtered_1992$asset_group[6:130] <- "next-125" # set next 125 rows
+```
+
+```{r}
+# merge the 4 decades
+
+merged_decades <- rbind(filtered_1992, filtered_2002, filtered_2012, filtered_desc)
+
+merged_decades <- merged_decades[, -c(5,6)]
+
+merged_decades$asset_group <- as.factor(merged_decades$asset_group) # make asset group factor type
+
+decades_summarised <- merged_decades %>% # summarise
+  group_by(year, asset_group) %>%
+  summarize(total_assets = sum(mean_assets))
+
+decades_wide <- spread(decades_summarised, key = asset_group, value = total_assets) # convert to wide type
+
+names(decades_wide)[names(decades_wide) == "top-5"] <- "top5"
+names(decades_wide)[names(decades_wide) == "next-125"] <- "next125"
+```
+
+```{r}
+decades_wide[1:3, 2:4] <- decades_wide[1:3, 2:4] * 1000
+```
+
+```{r}
+ap <- decades_wide %>% plot_ly(
+    hovertext = "Year, Total Assets"
+) #text = list('15.7%'))
+ap <- ap %>%
+  add_trace(x = decades_wide$year, y = ~top5, type = 'bar', name = 'Top 5', marker = list(color = '#118C4F'))
+
+ap <- ap %>%
+  add_trace(x = decades_wide$year, y = ~next125, type = 'bar', name = 'Next 125', marker = list(color = '#FFB90D'))
+ap <- ap %>%
+  add_trace(x = decades_wide$year, y = ~others, type = 'bar', name = 'Others' , marker = list(color = 'red'))
+#hovertemplate = paste('<i>Price</i>: $%{top5:.2f}',
+#                        '<br><b>X</b>: %year<br>',
+#                        '<b>%{text}</b>'))
+
+
+f <- list(
+  family = "Arial",
+  size = 18,
+  color = "black")
+f1 <- list(
+  title = "Year",
+  titlefont = "Arial")
+f2 <- list(
+  title = "Total Assets (USD)",
+  titlefont = "Arial")
+f3 <- list(
+  family = "Arial",
+  size = 18,
+  color = "black")
+
+ap <- ap %>% layout(xaxis = f1, yaxis = f2)
+ap <- ap %>% layout(title= list(text = "", y = 0.98, font = f3))
+ap <- ap %>% layout(legend=list(title=list(text='Asset Group')))
+ap
+
+saveWidget(ap, file = "../../website/plots/timeseries/plot_4.html")
+
+#
+```
+
+This plot breaks down the banks in the banks in the US by dividing them into groups: the top 5 banks, the next 125 banks, and all other banks. The total assets held by these banks is measured over the past 30 years, and this is was determines the groups and rankings.
+
+Looking at the most recent decade, we see that the top 5 banks in the US hold the same amount in assets as the next 125 banks in the US, and have about 3 times as many assets as every other bank in the country, which amounts to a total of 4031 banks. We see a large skew in the distribution of assets across the country, and this shows how concentrated the banking industry is right at the top. Furthermore, looking at the temporal trends, we also notice that the top 5 banks have not always dominated all other banks, and the distribution has progressively gotten more and more concentrated at the top.
+
+## References
+
+https://plotly.com/r/bar-charts/
+
+https://jtr13.github.io/spring19/community_contribution_group17.html
+
+https://chartio.com/learn/charts/stacked-bar-chart-complete-guide/
+
+https://r-graph-gallery.com/stacked-barplot.html
+
+https://www.federalreserve.gov/releases/lbr/current/
+
+https://rpubs.com/mbounthavong/R-plotly-bar-charts

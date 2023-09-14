@@ -1,0 +1,316 @@
+---
+format:
+  html:
+    toc: true
+    number-sections: true
+---
+
+# Where is Your Money, and Why? {#home}
+
+
+![Photo credit: @wilking_signs_2023](../img/header.jpg){width=80%}
+
+
+::: {.callout-note appearance="simple"}
+All code used in this report is available on [GitHub](https://github.com/anly503/spring2023-project-team-4).
+::: 
+
+
+
+
+```{python}
+#| echo: false
+
+# libraries
+from IPython.display import display, HTML, IFrame
+
+```
+
+## Abstract {#abstract .unnumbered}
+
+Inspired to learn more about the U.S. banking system following Silicon Valley Bank's failure in March 2023, we used 30 years of FDIC data to visualize the components of the U.S. banking system we found most interesting. We visualized U.S. bank assets' locations using historical financial data obtained through the FDIC API, finding some surprising results. Next, we dive deeper into why bank geographical locations resulted in the configuration. From there, we sought further to explore the changes within the concentration of assets and demonstrate how big banks have grown to hold a far more significant proportion of assets than they did 30 years ago. Finally, we used the equity capital ratio to understand the differing needs of various banks and how they can improve their financial position to respond to potential problems.
+
+
+## Introduction {#introduction}
+
+On Friday, March 10th, 2023, U.S. regulators seized Silicon Valley Bank (SVB) in the largest U.S. bank failure since the 2008 financial crisis [@vanian_heres_2023]. The 40-year-long bank operation suddenly stopped after depositors panicked when learning that the bank was short on capital. The public quickly turned its attention to the Federal Deposit Insurance Corporation (FDIC), which provides a standard insurance amount of $250,000 per depositor, per insured bank. The insurance fund has accomplished the goal of no depositor losing a penny of insured funds due to a failure since 1934 [@federal_deposit_insurance_corporation_what_2020]. The case of the FDIC showcased just one of the fascinating aspects of the U.S. banking system that was largely unknown to the general public. It also inspired us to carry out this project. 
+
+We aim to inform our audience of several distinguishing facts about the U.S. banking system and to do so in a visually captivating manner. First, we seek to provide insight into the complexity of where money is in the U.S. and what it means to have a location in this context. Then, we delve into the distribution of assets in the banking system and explore their concentration. Next, we switch our discussion to deposits and visualize their behavior over time. Lastly, we navigate bank health metrics and analyze the state of the U.S. banking sector. 
+
+First, we explore the average assets, equity, or liabilities segmented of each as of the end of the fourth quarter of 2022 @fig-interactive-table:
+
+#### **Table of US Bank Assets, Equity And Liabilities Per State as of 2022Q4** {#sec-interactive-table .unnumbered}
+
+```{python}
+#| echo: false
+#| label: fig-interactive-table
+#| fig-cap: "shows an interactive table with a dropdown allowing the selection of assets, equity, or liabilities. Given the static nature of this website, the table is sorted only by Equity. <i> Hello </i>"
+
+width_percentage = "100%"
+IFrame(src='../website/plots/interactive_table.html', width=width_percentage, height=600)
+
+
+```
+
+::: {.callout-note}
+Using this **interactive data table**, we can obtain a broad view of the US banking system size by several metrics, setting the stage for the following sections.
+:::
+
+
+
+While the average statewide banking system has 721.7 million U.S. dollars in equity and 7,784.8 billion in assets, we can see a considerable variation among the states. Notably, North Carolina, Delaware, and South Dakota	have average assets of 72,627.3, 64,104.4, and 61,841.7 U.S. dollars, respectively, while states such as Minnesota, Kansas, and Wyoming average 460.8, 439.6, and 359.0 U.S. dollars, respectively.
+
+## Where is Money Located? {#where-is-money-located}
+
+Let us clarify that your money is actually stored as bits in bank-operated servers. Each bank needs to maintain records of their customer's accounts, so multiple copies of this data may be stored across different servers. That is where your money actually is, but that is not very interesting. In this study, we adopted the Federal Reserve’s definition of a bank’s location: its main office, as listed in the bank’s charter [@board_of_governors_of_the_federal_reserve_system_frb_2022]. @fig-grid-bubble-map shows expected behavior from 1992 to 2002: Assets growing in the U.S. on the main financial hubs of New York and California. However, something alluring started to happen in 2012. Assets start rapidly growing in South Dakota, Ohio, and North Carolina. What is happening? 
+
+#### **Grid Bubble Map of the Progression of Bank Assets Per Decade Per State** {#sec-grid-bubble-map .unnumbered}
+
+```{python}
+#| echo: false
+#| label: fig-grid-bubble-map
+#| fig-cap: "shows a 2x2 grid of Folium maps depicting the relative size of fourth-quarter U.S. bank assets per state every ten years since 1992."
+
+unique_dates = ['1992-12-31', '2002-12-31', '2012-12-31', '2022-12-31']
+
+# init html structure
+html_structure = """
+<style>
+    .map-container {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .map-box {
+        width: 50%;
+        padding: 5px;
+        box-sizing: border-box;
+    }
+    .map-title {
+        text-align: center;
+        font-weight: bold;
+    }
+</style>
+<div class="map-container">
+"""
+
+# add iframes to the html
+for i, date in enumerate(unique_dates):
+    map_path = f'../website/plots/map_{i}.html'
+    html_structure += f'<div class="map-box"><div class="map-title">{date}</div>{IFrame(src=map_path, width=350, height=300)._repr_html_()}</div>'
+
+# close html
+html_structure += '</div>'
+# show
+display(HTML(html_structure))
+
+
+```
+
+
+#### **Dot Map With Heatmap Overlay of Bank Assets as of 2022Q4** {#sec-dot-and-heatmap .unnumbered}
+
+
+In @fig-dot-and-heatmap, we take a deeper dive into what’s going on. We can see in the heatmap layer that banks aggregate in many places in the U.S. However, we can quickly determine that the quantity of banks does not correlate with the number of assets in a state. The largest bubbles in the plot represent Citibank and Wells Fargo in South Dakota, JP Morgan Chase in Ohio, and Bank of America in North Carolina. To explore why, we look closer at the states where we would expect the assets to be and where they are in the next section.
+
+
+
+```{python}
+#| echo: false
+#| label: fig-dot-and-heatmap
+#| fig-cap: "shows dots representing the ZIP Code of the FDIC-insured banks' location within the U.S., where the bubbles represent the relative size of the assets, allowing one to see the location of the largest banks."
+
+width_percentage = "100%"
+IFrame(src='../website/plots/heatmap.html', width=width_percentage, height=600)
+
+```
+
+::: {.callout-note}
+For this **innovative view**, we included both a heatmap and a dot map on a Folium object with tooltips present. Due to Folium constraints, each of these elements was coded using for loops to assign data to the right element. This view allows us to see clearly that the density of banks in a region does not strongly impact the size of banking assets in a state, but rather, whether large banks have moved to that state. These elements foreshadow the discussion in the sections to come.
+:::
+
+## A Deeper Dive by State {#deeper-dive-by-state}
+
+
+Intuition may suggest that California, Texas, and New York should have significantly more bank deposits than smaller states like South Dakota, given their respective populations and GDP. However, large banks such as Wells Fargo and Citibank have their main offices in Sioux Falls, South Dakota. The deposits in these banks entirely envelop the rest of the deposits in the state. Similarly, JP Morgan Chase's main office is in Ohio, and Bank of America is in North Carolina, making up the vast majority of the total deposits in the state.
+
+
+
+
+
+#### **State Bank Deposits by Bank** {#sec-state-bank-deposits .unnumbered}
+
+```{python}
+#| echo: false
+#| label: fig-state-bank-deposits
+#| fig-cap: "shows the differences in the size of the deposits in California, Ohio, Texas, North Carolina, New York, and South Dakota."
+
+width_percentage = "100%"
+IFrame(src='../website/plots/plot-3.html', width=width_percentage, height=650)
+
+```
+
+
+In the 1980s, South Dakota eliminated the cap on interest rates and fees to attract investment during an economic recession. Citibank was the first to answer. The success of this move prompted other banks such as Wells Fargo, Capital One, and First Premier to move to the state, which, in 2013, held more bank assets than any other state in the U.S. [@journal_how_2013] Bank of America's main office is in Charlotte, North Carolina, for similar regulatory reasons, which is now the second largest state by bank asset size [@frost_uss_2019]. Figure 3 shows the effect of these moves on state deposits.
+
+While not central to @fig-state-bank-deposits, we noted a rapid deposit growth in 2020 due to various stimulus efforts. It is important to notice the difference in the y-axis between the two columns. The left column features the three largest states by GDP, while the right features the three states we found to be most notable [@bureau_of_economic_analysis_gdp_2023]. Namely, these states house the four largest banks by total deposits. We can easily detect the differences between states. However, in the next section, we discuss the overall structure of the market and the relative significance of the top banks in the system.
+
+
+
+
+
+## A Story About The Top Banks {#story-about-the-top-banks}
+
+#### **Temporal Trend of the Total Domestic Deposits in the US for the Past 3 Decades** {#sec-temporal-assets .unnumbered}
+
+```{python}
+#| echo: false
+#| label: fig-temporal-assets
+#| fig-cap: "shows the temporal trends in domestic deposits held by different asset classes, for the past 3 decades"
+
+width_percentage = "100%"
+IFrame(src='../website/plots/timeseries/plot_1.html', width=width_percentage, height=600)
+
+```
+
+After exploring the states with the most deposits in the US, we switch gears to explore the trend of the total domestic deposits in the entire country for the past 3 decades, facetted by the different bank classes. Looking at this particular plot, we see a staggering uptick in bank deposits over the past 3 decades. Breaking down the assets by the bank class, we also see that each of the bank classes also have their own trends in terms of growth over the years. Firstly, looking at National Member Banks, we see that the majority of deposits belong to them. These banks are ones that are members of the Federal Reserve Bank, the central bank of the US. However, from the temporal trends, we see that National Member Banks did not always hold the majority of assets in the country. The only time there was an apparent upshot in the assets was around the 2000 mark, when the National Member Banks got a hold of a lot more assets and skyrocketed ahead of the other types of banks. We also see that Stock & Mutual Savings Banks have the least amount deposited in them, as they offer the most risk.
+
+
+#### **Assets Held by the Top 10 Banks in 2022 in Comparison to All Others** {#sec-top-banks .unnumbered}
+
+```{python}
+#| echo: false
+#| label: fig-top-banks
+#| fig-cap: "shows the 10 largest banks in the US for Q42022 by the amount of assets held"
+
+width_percentage = "100%"
+IFrame(src='../website/plots/timeseries/plot_2.html', width=width_percentage, height=600)
+
+```
+
+The US is home to some of the largest and most popular commercial banks in the world. These banks offer a wide array of services to individuals and businesses. The banks we’re most familiar with are the ones that are prevalent not only all over the country, but all over the world as well. These multinationals field a behemoth of assets, and dominate the entire industry. In the US, we see that there are 4 main banks which dominate the rest of the top 10. These banks are JP Morgan, Bank of America, Wells Fargo, and Citibank. The stark disparity in these top 4 is noticeable by examining how Wells Fargo, the 4th largest bank in the US by assets, holds \$1.73B, while US Bank, the 5th largest bank, only holds \$584M, which is about 3 times less than that of US Bank. This resembles a skew in the distribution of assets held by the top 10 commercial banks in the US, with the top 4 banks holding the majority of the assets. These discoveries follow on to looking at the overall distribution of assets by banks.
+
+#### **The Distribution of Commercial Banks in the US by the Assets in Possession for 2022** {#sec-top-commercial .unnumbered}
+
+
+```{python}
+#| echo: false
+#| label: fig-top-commercial
+#| fig-cap: "shows the distribution of banks in the US for Q42022, grouped by the amount of assets held at the time"
+
+width_percentage = "100%"
+IFrame(src='../website/plots/timeseries/plot_3.html', width=width_percentage, height=600)
+
+```
+
+Looking at the distribution of commercial banks in the US by the assets in possession, we get a better idea of what the entire distribution of assets is across the country. Our knowledge is mostly limited to the big brand names of banks: JP Morgan, Wells Fargo, Bank of America, etc. These banks are the minority in the larger picture, as their access to capital and resources is only enjoyed by 3.6% of banks in the US. The majority of these banks only hold between \$100M and \$1B, taking up 62.4% of the entire distribution. Surprisingly, we see that a substantial 15.7% of banks are extremely small, holding less than \$100M in assets in Q42022. Only a small fraction of these banks are in fact extremely large, which might indicate a healthy banking ecosystem. However, as we will see in the next plot, the few top banks hold an immense amounts of assets.
+
+
+#### **Breakdown of Top 5 Banks, the Next 125 Banks, and All Other Banks** {#sec-grouped-top-banks .unnumbered}
+
+```{python}
+#| echo: false
+#| label: fig-grouped-top-banks
+#| fig-cap: "shows the temporal trend of the distribution of assets held by different asset classes"
+
+width_percentage = "100%"
+IFrame(src='../website/plots/timeseries/plot_4.html', width=width_percentage, height=600)
+
+```
+
+This plot breaks down U.S. banks by placing them into one of three groups based on the number of assets they held. The total assets these banks hold determine the groups and rankings for each year over the past three decades. Examining the plot, we see that in the most recent decade, the top 5 banks in the U.S. hold the same amount in assets as the subsequent 125 banks and have about three times as many assets as every other bank in the country, amounting to 4,031 banks. We observe a strong skew in the distribution of assets across the country, and this shows how concentrated the banking industry is right at the top. We also notice how a few banks, including Bank of America, Citibank, and JP Morgan, held the most assets during the period examined.
+
+Furthermore, looking at temporal trends, we also notice that the top 5 banks in the U.S. have not always wholly dominated all the other banks; this distribution has progressively gotten more and more concentrated at the top. For example, for 1992 and 2002, we noticed a far smaller concentration level in the industry. However, in 2022, we see a complete change, as the top 5 banks hold more assets than the other groups. These developments may cause concern for the health of competition in the industry, and next, we will evaluate the overall health of the system.
+
+
+## The Health Of The System {#health-of-the-system}
+
+In order to tie our research together, we wanted to examine the top banks compared to the rest of the FDIC-insured banks in a similar metric. Since this project started as a result of the failure of Silicon Valley Bank in March of 2023, we wanted to explore a metric that demonstrated a bank's ability to react to economic downturn. The metric we decided to explore is the equity capital ratio. A bank’s equity capital ratio (which will be denoted as EQR), similar to a bank’s tier 1 capital ratio, is the amount of a bank’s equity as a measure of its total capital. It is a measure of a bank’s financial strength and ability to withstand economic downturns and absorb losses. The FDIC often requires a minimum 4% equity capital ratio for banks that it insures in order to allow the bank to become less reliant on debt and increase shareholder satisfaction. The equity capital ratio is an interesting figure to help project the stability of a bank.
+
+For this section, we will take a look at some of the outliers in terms of average equity capital ratio, and also compare the four largest banks that we have been analyzing throughout this project to smaller banks to see if they manage their equity differently. Each bank uniquely positions themselves to be able to respond to financial hardship. Some banks are more suited to take risks and maintain a lower equity capital ratio, and this can be due to a variety of factors that we will explore later.
+
+First, we will look at the highest and lowest banks in terms of equity capital ratio.
+
+
+#### **Top and Bottom 20 Histogram** {#sec-top-bottom-histogram .unnumbered}
+
+```{python}
+#| echo: false
+#| label: fig-top-bottom-histogram
+#| fig-cap: "Linked histogram and line chart of top and bottom 20 banks in terms of average equity capital ratio, along with overall average. Selecting a column of the histogram will modify the line chart to only display that particular bank."
+
+width_percentage = "100%"
+IFrame(src='../website/plots/eqr/plot1.html', width=width_percentage, height=800)
+
+```
+
+::: {.callout-note}
+For this **linked view**, we can depart from the global view of the EQR trends to obtain a clearer insight into the trends of one specific bank by selecting it on the top plot.
+:::
+
+
+This plot examines banks that represent the top and bottom 20 in average EQR by quarter, with an additional column for the overall average. For this analysis, I filtered out any banks that do not appear in the data for more than 100 quarters (roughly 80% of the quarters). This is to eliminate any potential outliers in the data. The mean value does not all observations in the data; it only includes all banks with more than 100 quarters of data since Q1 1992. Looking at the histogram, we notice that the average EQR of 11.22 is far closer to the 20 banks that have the lowest equity capital ratio compared to the 20 banks that have the highest equity capital ratio. Looking at the 5 number summary, we see that the average (11.22) is lower than the median (10.27), indicating that there are a few banks with a far higher equity capital ratio than the majority of the rest of the banks in the FDIC database. When we more closely examine the banks that fall in the range of top or bottom 20, we see that there is no consistent state across these banks. It is noteworthy that Michigan has 2 of the 3 highest banks in terms of EQR. Another noteworthy observation is that banks in Ohio, South Dakota, and North Carolina only make up 3 of the top 20 banks in average equity capital ratio. Moreover, none of the largest banks in terms of total assets are present on this list.
+
+Next, we will attempt to get a better idea of the equity capital ratio for the specific banks that we have been analyzing, and see if they deviate from the overall trend.
+
+
+#### **Quarters Line Graph** {#sec-quarters-line-graph .unnumbered}
+
+```{python}
+#| echo: false
+#| label: fig-quarters-line-graph
+#| fig-cap: "Two line plots. The upper line plot reflects the quarterly equity capital ratio over a 30-year period for each of the top four banks we have noted, and the lower line plot reflects the overall average equity capital ratio for each quarter."
+
+width_percentage = "100%"
+IFrame(src='../website/plots/eqr/plot2_double.html', width=width_percentage, height=750)
+
+```
+
+We see based on the line graph above that, for the most part, the 4 major banks maintain a relatively consistent equity capital ratio. After 2004, which is the first quarter that JP Morgan Chase Bank NA is present in this data, we notice that none of the banks ever reach an equity capital ratio higher than 13, and for the most part, they have all reached a similar value between 8 and 10 since 2020. The only time any of these banks record an equity capital ratio that is well above the cumulative average is prior to the turn of the 20th century, when Bank of America NA records several quarters with an equity capital ratio over 20. Comparing the four largest banks to the overall average for all FDIC-insured banks present in the data, we see that, for the most part, the four largest banks are either identical to, or slightly below, the overall average equity capital ratio over the past 2 decades. This is due to the differing immediate needs between large national banks, such as Wells Fargo and Bank of America, and smaller, more localized banks. There are a few reasons for the difference in focus. The first is that larger banks often have greater access to capital markets, and are thus less reliant on using their own capital to fund everyday business operations. Therefore, they do not necessarily need to maintain a high equity capital ratio. The next reason is because smaller banks often take a more conservative stance on risk management, and since equity capital ratio is a way to quantify a bank's risk management, it can in part explain why a smaller bank's equity capital ratio is higher, on average. Finally, the difference can be explained by differences in regulatory laws and the market/customer base that a bank is typically functioning in. Nevertheless, the FDIC does set regulations for a minimum equity capital ratio, so even the largest banks in the industry need to ensure that they have a sufficient equity capital ratio and are thus in a stronger financial position in the event of an economic downturn. While larger banks have more resources than smaller banks and thus have more methods of improving their financial position to respond to potential problems, they still must maintain sufficient equity.
+
+The main idea is to see that there is not a major distinction between the four largest banks and the rest of the FDIC-insured banks in terms of their quarterly equity capital ratio.
+
+For the next part of the analysis, we will focus on smaller banks in terms of average total assets to see if they differ in their optimal strategy when it comes to maintaining a specific equity capital ratio.
+
+#### **EQR and Assets: Small Counts** {#sec-eqr-and-assets .unnumbered}
+
+```{python}
+#| echo: false
+#| label: fig-eqr-and-assets
+#| fig-cap: "Heatmap of equity capital ratio vs average total assets owned. Filtered to only include banks with average total assets owned less than or equal to 500,000. The plot also shows the overall distibutions of the two columns in histogram form."
+
+width_percentage = "100%"
+IFrame(src='../website/plots/eqr/plot3.html', width=width_percentage, height=700)
+
+```
+
+This plot attempts to look at smaller banks in terms of mean total assets owned over all quarters and forecast their average equity capital ratio. This heatmap contains over 200,000 unique banks, all with average total assets owned below 500,000. Based on the values of the heatmap, we see that the majority of these banks hold a small amount of assets, typically below 100,000. Nevertheless, most banks that make up this proportion maintain an equity capital ratio between 8 and 12, which is consistent relative to the average that we have previously examined. 
+
+
+#### **Bubble Plot** {#sec-bubble-plot .unnumbered}
+
+```{python}
+#| echo: false
+#| label: fig-bubble-plot
+#| fig-cap: "Bubble plot showing equity capital and equity capital ratio for Q4 of given year. Color represents bank class, as noted in the legend."
+
+width_percentage = "100%"
+IFrame(src='../website/plots/eqr/plot4_large.html', width=width_percentage, height=650)
+
+```
+
+A major trend we notice when looking at this time series bubble plot is the gradual increase in quantity of banks with an equity capital ratio in the range of the average that is consistent with what we have been examining thus far. What is also noticeable is that there does not appear to be a major distinction by bank class. State chartered stock savings banks, denoted in the legend as SI, appear to always have a relatively low equity capital ratio, while commercial and federal savings banks, denoted as N, NM, and SB in the above plot, tend to have a higher equity capital ratio.
+
+We also note the density within the lower equity capital ratio values throughout the decades observed, which indicates that many banks are concentrated around the average value.
+
+This helps us understand that even though banks such as Wells Fargo and Bank of America far surpass other FDIC-insured banks in terms of total deposits, their strategy when it comes to maintaining a specific equity capital ratio remains consistent with smaller banks. The general trends in terms of EQR for the larger banks fall in line with the general trendline for average EQR, especially over the past decade or so, when we have begun to notice the disparity in terms of assets and deposits of these banks.
+
+
+
+## Conclusion {#conclusion}
+
+In this project, we examined several fascinating aspects of the U.S. banking system. First, we found that South Dakota and Ohio bank assets have grown rapidly compared to more populated states like New York and California. Once broken down by bank, we found the reason to be that the largest banks in the country had moved to these smaller states. We then compared the highest GDP states to the states that house the four largest banks and found that these banks make up almost all those states' total deposits. The same large bank's total deposits also far exceed all deposits in those higher GDP states. Further research shows this is due to relaxed banking regulations and lower tax rates [@fritts_state_2023]. 
+
+We also explored the temporal trends in the concentration of assets held by U.S. banks. We identified how a few top players dominate the industry entirely and how this trend has worsened over the last three decades. Finally, we noted no significant differences in equity capital ratio between top banks, especially over the past few decades, as these banks have scaled in size. We found the cause to be differing immediate needs between larger and smaller banks. Our main takeaway for our audience is that the banking system tells a story of financial wellness while also raising caution on the concentration of resources and regulatory arbitrage.
+
+
+## References {#references .unnumbered}

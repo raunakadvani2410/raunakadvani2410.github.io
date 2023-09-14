@@ -1,0 +1,26 @@
+# Authors {#authors}
+
+::: {layout-ncol=2}
+
+### Austin Barish
+![](../img/authors/austin_barish.png)
+ I am currently a senior at Georgetown majoring in Economics and Philosophy while pursuing Georgetown's accelerated Data Science degree. I am originally from Denver, Colorado, and love sports, particularly skiing. I have been in DC for the past 3-ish years now and absolutely love it. I am particularly interested in economic research, sports data, and environmental causes. abb110@georgetown.edu
+
+### Jordan Rinaldi
+![](../img/authors/jordan_rinaldi.png)
+I am in the 5-year combined/accelerated program at DSAN, meaning that I am currently an undergraduate senior at Georgetown who is also taking graduate classes. I am majoring in math and double minoring in economics and government. I hope to enter the field of data science and analytics, preferably on the more data side of the industry. jar388@georgetown.edu
+
+:::
+
+::: {layout-ncol=2}
+
+### Raunak Advani
+![](../img/authors/raunak_advani.jpg)
+I’m currently a senior at Georgetown University completing my undergraduate degree in Economics with a minor in Psychology. I’m currently enrolled in Georgetown’s Accelerated BA/MS DSAN program, which means that I will complete both my BA in Economics and MS in DSAN in 5 years. I'm interested in data analytics, economics research, and machine learning, and their potential applications in the corporate world. ra1113@georgetown.edu
+
+### Victor De Lima
+![](../img/authors/victor_delima.jpeg)
+I am a currently a first year student at the MS in Data Science and Analytics program. I am very interested in how machine learning models work. I want to play a part in how these models can be made better and smarter. I am hoping to lay a strong foundation for this during my time at the DSAN program. Some of my other interests are science in general, physics, technology, traveling, and history. I also love programming. vad49@georgetown.edu
+
+
+:::

@@ -1,0 +1,4 @@
+/.quarto/
+data/all_financials.csv
+data/quarterly_banks_by_state.csv
+theme_files/
